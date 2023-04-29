@@ -21,19 +21,19 @@ If one of these classes appear in your stack-trace, please make sure you made LW
 
 They can be set by either `-Djvm.value=true/false` or by defining `0/1` as environment variable.
 
-| JVM Argument                               | Environment Variable               | Description  |
-| :----------------------------------------- | :--------------------------------- | :----------- |
-| `-Dorg.lwjglx.assume-gl-extensions=`       | `LWJGLX_ASSUME_GL_EXTENSIONS`      | Should assume some LWJGL2 extension support if their LWJGL3 counterpart are supported (default enabled)
-| `-Dorg.lwjglx.attr-recreate-display=`      | `LWJGLX_ATTR_RECREATE_DISPLAY`     | Should attribute change recreate GLFW display (default enabled)
-| `-Dorg.lwjglx.resize-recreate-display=`    | `LWJGLX_RESIZE_RECREATE_DISPLAY`   | Should resizing recreate GLFW display (default disabled)
-| `-Dorg.lwjglx.awt-canvas-no-create=`       | `LWJGLX_AWT_CANVAS_NO_CREATE`      | Should avoid creating Display when `new AWTGLCanvas()` is called. (default disabled)
-| `-Dorg.lwjglx.early-display-create=`       | `LWJGLX_EARLY_DISPLAY_CREATE`      | Should create Display as soon as possible (default disabled)
-| `-Dorg.lwjglx.early-display-resizable=`    | `LWJGLX_EARLY_DISPLAY_RESIZEABLE`  | Should Display be initially resizable (default disabled)
-| `-Dorg.lwjglx.disable-window-icon=`        | `LWJGLX_DISABLE_WINDOW_ICON`       | Should ignore windows icons (default enabled cause broken)
+| JVM Argument                          | Environment Variable               | Description  |
+| :------------------------------------ | :--------------------------------- | :----------- |
+| `org.lwjglx.assume-gl-extensions`     | `LWJGLX_ASSUME_GL_EXTENSIONS`      | Should assume some LWJGL2 extension support if their LWJGL3 counterpart are supported (default enabled)
+| `org.lwjglx.attr-recreate-display`    | `LWJGLX_ATTR_RECREATE_DISPLAY`     | Should attribute change recreate GLFW display (default enabled)
+| `org.lwjglx.resize-recreate-display`  | `LWJGLX_RESIZE_RECREATE_DISPLAY`   | Should resizing recreate GLFW display (default disabled)
+| `org.lwjglx.awt-canvas-no-create`     | `LWJGLX_AWT_CANVAS_NO_CREATE`      | Should avoid creating Display when `new AWTGLCanvas()` is called. (default disabled)
+| `org.lwjglx.early-display-create`     | `LWJGLX_EARLY_DISPLAY_CREATE`      | Should create Display as soon as possible (default disabled)
+| `org.lwjglx.early-display-resizable`  | `LWJGLX_EARLY_DISPLAY_RESIZEABLE`  | Should Display be initially resizable (default disabled)
+| `org.lwjglx.disable-window-icon`      | `LWJGLX_DISABLE_WINDOW_ICON`       | Should ignore windows icons (default enabled cause icons are currently broken)
 
 
 ## Game specific workaround
 
-TODO
+TODO (defaults shuold work fine)
 
 For an android version of the library please check out [pojavLauncher](https://github.com/PojavLauncherTeam/PojavLauncher/tree/v3_openjdk/jre_lwjgl3glfw).
