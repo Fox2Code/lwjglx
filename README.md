@@ -1,5 +1,5 @@
 # lwjglx
-LWJGL2 compatibility layer for LWJGL3
+Desktop LWJGL2 compatibility layer for LWJGL3
 
 ## Overrides
 
@@ -29,9 +29,11 @@ They can be set by either `-Djvm.value=true/false` or by defining `0/1` as envir
 | `-Dorg.lwjglx.awt-canvas-no-create=`       | `LWJGLX_AWT_CANVAS_NO_CREATE`      | Should avoid creating Display when `new AWTGLCanvas()` is called. (default disabled)
 | `-Dorg.lwjglx.early-display-create=`       | `LWJGLX_EARLY_DISPLAY_CREATE`      | Should create Display as soon as possible (default disabled)
 | `-Dorg.lwjglx.early-display-resizable=`    | `LWJGLX_EARLY_DISPLAY_RESIZEABLE`  | Should Display be initially resizable (default disabled)
-| `-Dorg.lwjglx.disable-window-icon=`        | `LWJGLX_DISABLE_WINDOW_ICON`       | Should ignore windows icons (default disabled)
+| `-Dorg.lwjglx.disable-window-icon=`        | `LWJGLX_DISABLE_WINDOW_ICON`       | Should ignore windows icons (default enabled cause broken)
 
 
 ## Game specific workaround
 
 TODO
+
+For an android version of the library please check out [pojavLauncher](https://github.com/PojavLauncherTeam/PojavLauncher/tree/v3_openjdk/jre_lwjgl3glfw).
