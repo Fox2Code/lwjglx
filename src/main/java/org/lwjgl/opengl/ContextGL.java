@@ -38,6 +38,7 @@ import org.lwjgl.Sys;
 
 import org.lwjgl.glfw.GLFW;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -97,36 +98,25 @@ final class ContextGL implements Context {
     }
 
     /** Create a context with the specified peer info and shared context */
-    ContextGL(PeerInfo peer_info, ContextAttribs attribs, ContextGL shared_context) throws LWJGLException {
-        ContextGL context_lock = shared_context != null ? shared_context : this;
+    ContextGL(PeerInfo peer_info,@Nullable ContextAttribs attribs,@Nullable ContextGL shared_context) throws LWJGLException {
+        final ContextGL context_lock = shared_context != null ? shared_context : this;
         // If shared_context is not null, synchronize on it to make sure it is not deleted
         // while this context is created. Otherwise, simply synchronize on ourself to avoid NPE
         synchronized ( context_lock ) {
-            if ( shared_context != null && shared_context.destroyed )
+            if (shared_context != null && shared_context.destroyed)
                 throw new IllegalArgumentException("Shared context is destroyed");
             // GLContext.loadOpenGLLibrary();
             // try {
-                this.peer_info = peer_info;
-                this.contextAttribs = attribs;
-/*
-                IntBuffer attribList;
-                if ( attribs != null ) {
-                    attribList = attribs.getAttribList();
-                    forwardCompatible = attribs.isForwardCompatible();
-                } else {
-                    attribList = null;
-                    forwardCompatible = false;
-                }
-*/
+            this.peer_info = peer_info;
+            this.contextAttribs = attribs;
 
-                forwardCompatible = false;
+            if (attribs != null) {
+                this.forwardCompatible = attribs.isForwardCompatible();
+            } else {
+                this.forwardCompatible = false;
+            }
 
-                this.handle = null;
-                // implementation.create(peer_info, attribList, shared_context != null ? shared_context.handle : null);
-            /* } catch (LWJGLException e) {
-                // GLContext.unloadOpenGLLibrary();
-                throw e;
-            } */
+            this.handle = null;
         }
     }
 
@@ -242,13 +232,13 @@ final class ContextGL implements Context {
      * The context is destroyed when no thread has it current.
      */
     public synchronized void destroy() throws LWJGLException {
-        if ( destroyed )
+        if (destroyed)
             return;
         destroy_requested = true;
         boolean was_current = isCurrent();
         int error = GL_NO_ERROR;
         if ( was_current ) {
-            if ( GLContext.getCapabilities() != null && GLContext.getCapabilities().OpenGL11 )
+            if (GLContext.getCapabilities().OpenGL11)
                 error = glGetError();
             releaseCurrent();
         }
@@ -258,35 +248,7 @@ final class ContextGL implements Context {
     }
 
     public synchronized void setCLSharingProperties(final PointerBuffer properties) throws LWJGLException {
-        final ByteBuffer peer_handle = peer_info.lockAndGetHandle();
-        try {
-            /*
-            switch ( LWJGLUtil.getPlatform() ) {
-                case LWJGLUtil.PLATFORM_WINDOWS:
-                    final WindowsContextImplementation implWindows = (WindowsContextImplementation)implementation;
-                    properties.put(KHRGLSharing.CL_GL_CONTEXT_KHR).put(implWindows.getHGLRC(handle));
-                    properties.put(KHRGLSharing.CL_WGL_HDC_KHR).put(implWindows.getHDC(peer_handle));
-                    break;
-                case LWJGLUtil.PLATFORM_LINUX:
-                    final LinuxContextImplementation implLinux = (LinuxContextImplementation)implementation;
-                    properties.put(KHRGLSharing.CL_GL_CONTEXT_KHR).put(implLinux.getGLXContext(handle));
-                    properties.put(KHRGLSharing.CL_GLX_DISPLAY_KHR).put(implLinux.getDisplay(peer_handle));
-                    break;
-                case LWJGLUtil.PLATFORM_MACOSX:
-                    if (LWJGLUtil.isMacOSXEqualsOrBetterThan(10, 6)) { // only supported on OS X 10.6+
-                        // http://oscarbg.blogspot.com/2009/10/about-opencl-opengl-interop.html
-                        final MacOSXContextImplementation implMacOSX = (MacOSXContextImplementation)implementation;
-                        final long CGLShareGroup = implMacOSX.getCGLShareGroup(handle);
-                        properties.put(APPLEGLSharing.CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE).put(CGLShareGroup);
-                        break;
-                    }
-                default:
-                    throw new UnsupportedOperationException("CL/GL context sharing is not supported on this platform.");
-            }
-            */
-        } finally {
-            // peer_info.unlock();
-        }
+        throw new UnsupportedOperationException("CL/GL context sharing is not supported on this platform.");
     }
 
 }

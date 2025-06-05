@@ -3,7 +3,6 @@ package org.lwjgl.input;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyCodes {
-	
 	public static int toLwjglKey(int glfwKeyCode) {
 		
 		switch(glfwKeyCode) {
@@ -155,13 +154,11 @@ public class KeyCodes {
 //		public static final int KEY_POWER           = 0xDE;
 //		public static final int KEY_SLEEP           = 0xDF;
 
-		default: 	System.out.println("UNKNOWN GLFW KEY CODE: " + glfwKeyCode);
-					return Keyboard.KEY_NONE;
+		default: return Keyboard.KEY_NONE;
 		}
 	}
-	
+
 	public static int toGlfwKey(int lwjglKeyCode) {
-		
 		switch(lwjglKeyCode) {
 		
 		case Keyboard.KEY_ESCAPE	: return GLFW.GLFW_KEY_ESCAPE;
@@ -313,9 +310,29 @@ public class KeyCodes {
 //		public static final int KEY_POWER           = 0xDE;
 //		public static final int KEY_SLEEP           = 0xDF;
 
-		default: 	System.out.println("UNKNOWN LWJGL KEY CODE: " + lwjglKeyCode);
-					return GLFW.GLFW_KEY_UNKNOWN;
+		default: return GLFW.GLFW_KEY_UNKNOWN;
 		}
 	}
 
+	public static int toLwjglKeyWarn(int glfwKeyCode) {
+		if (glfwKeyCode == GLFW.GLFW_KEY_UNKNOWN) {
+			return Keyboard.KEY_NONE;
+		}
+		int lwjglKeyCode = toLwjglKey(glfwKeyCode);
+		if (lwjglKeyCode == Keyboard.KEY_NONE) {
+			System.out.println("UNKNOWN GLFW KEY CODE: " + glfwKeyCode);
+		}
+		return lwjglKeyCode;
+	}
+
+	public static int toGlfwKeyWarn(int lwjglKeyCode) {
+		if (lwjglKeyCode == Keyboard.KEY_NONE) {
+			return GLFW.GLFW_KEY_UNKNOWN;
+		}
+		int glfwKeyCode = toGlfwKey(lwjglKeyCode);
+		if (glfwKeyCode == GLFW.GLFW_KEY_UNKNOWN) {
+			System.out.println("UNKNOWN LWJGL KEY CODE: " + lwjglKeyCode);
+		}
+		return glfwKeyCode;
+	}
 }

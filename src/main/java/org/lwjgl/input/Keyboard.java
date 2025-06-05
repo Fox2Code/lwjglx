@@ -9,6 +9,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.system.LWJGLXHelper;
 
 public class Keyboard {
 	
@@ -175,29 +176,8 @@ public class Keyboard {
 	public static final int KEYBOARD_SIZE = 256;
 
 	private static final String[] keyName = new String[KEYBOARD_SIZE];
-	private static final Map<String, Integer> keyMap = new HashMap<String, Integer>(253);
-
-	static {
-		// Use reflection to find out key names
-		Field[] fields = Keyboard.class.getFields();
-		try {
-			for (Field field : fields) {
-				if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())
-						&& Modifier.isFinal(field.getModifiers()) && field.getType().equals(int.class)
-						&& field.getName().startsWith("KEY_") && !field.getName().endsWith(
-								"WIN")) { /* Don't use deprecated names */
-
-					int key = field.getInt(null);
-					String name = field.getName().substring(4);
-					keyName[key] = name;
-					keyMap.put(name, key);
-				}
-
-			}
-		} catch (Exception e) {
-		}
-
-	}
+	private static final Map<String, Integer> keyMap = new HashMap<>(KEYBOARD_SIZE);
+	private static boolean lwjglxKeyboardTranslateInitialized = false;
 
 	public static void addKeyEvent(int key, int status) {
 		// eventCount++;
@@ -209,7 +189,7 @@ public class Keyboard {
 				break;
 		case GLFW.GLFW_RELEASE:
 		case GLFW.GLFW_PRESS:
-			keyEvents[queue.getNextPos()] = KeyCodes.toLwjglKey(key);
+			keyEvents[queue.getNextPos()] = KeyCodes.toLwjglKeyWarn(key);
 			keyEventStates[queue.getNextPos()] = status == GLFW.GLFW_PRESS || status == GLFW.GLFW_REPEAT;
 
 			nanoTimeEvents[queue.getNextPos()] = Sys.getNanoTime();
@@ -225,7 +205,7 @@ public class Keyboard {
 	}
 
 	public static void addCharEvent(int key, char c) {
-		int index = KeyCodes.toLwjglKey(key);
+		int index = KeyCodes.toLwjglKeyWarn(key);
 		keyEventChars[index] = c;
 	}
 
@@ -238,7 +218,9 @@ public class Keyboard {
 	}
 
 	public static boolean isKeyDown(int key) {
-		int k = GLFW.glfwGetKey(Display.getWindow(), KeyCodes.toGlfwKey(key));
+		int glfwKeyCode = KeyCodes.toGlfwKeyWarn(key);
+		if (glfwKeyCode == GLFW.GLFW_KEY_UNKNOWN) return false;
+		int k = GLFW.glfwGetKey(Display.getWindow(), glfwKeyCode);
 
 		return k == GLFW.GLFW_PRESS || k == GLFW.GLFW_REPEAT;
 	}
@@ -288,10 +270,12 @@ public class Keyboard {
 	}
 
 	public static String getKeyName(int key) {
+		lwjglxInitializeKeyboardTranslate();
 		return keyName[key];
 	}
 
 	public static int getKeyIndex(java.lang.String keyName) {
+		lwjglxInitializeKeyboardTranslate();
 		Integer ret = keyMap.get(keyName);
 		if (ret == null)
 			return KEY_NONE;
@@ -305,5 +289,46 @@ public class Keyboard {
 
 	public static void destroy() {
 
+	}
+
+	public static void lwjglxInitializeKeyboardTranslate() {
+		if (lwjglxKeyboardTranslateInitialized) return;
+		lwjglxKeyboardTranslateInitialized = true;
+		if (LWJGLXHelper.translateKeyNames) {
+			for (int key = 0; key < KEYBOARD_SIZE; key++) {
+				int glfwKey = KeyCodes.toGlfwKey(key);
+				if (glfwKey == GLFW.GLFW_KEY_UNKNOWN) {
+					continue;
+				}
+				String name = GLFW.glfwGetKeyName(glfwKey, -1);
+				if (name == null || name.isEmpty()) {
+					continue;
+				}
+				if (keyName[key] == null && !keyMap.containsKey(name)) {
+					keyName[key] = name;
+					keyMap.put(name, key);
+				}
+			}
+		}
+
+		// Use reflection to find out key names
+		Field[] fields = Keyboard.class.getFields();
+		try {
+			for (Field field : fields) {
+				if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())
+						&& Modifier.isFinal(field.getModifiers()) && field.getType().equals(int.class)
+						&& field.getName().startsWith("KEY_") &&
+						!field.getName().endsWith("WIN")) { /* Don't use deprecated names */
+
+					int key = field.getInt(null);
+					String name = field.getName().substring(4);
+					if (keyName[key] == null && !keyMap.containsKey(name)) {
+						keyName[key] = name;
+						keyMap.put(name, key);
+					}
+				}
+
+			}
+		} catch (Exception ignored) {}
 	}
 }

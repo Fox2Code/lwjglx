@@ -13,6 +13,7 @@ public class LWJGLXHelper {
     public static boolean awtCanvasNoCreate = loadParam("awt-canvas-no-create", false); // LWJGLX_AWT_CANVAS_NO_CREATE
     public static boolean earlyDisplayCreate = loadParam("early-display-create", false); // LWJGLX_EARLY_DISPLAY_CREATE
     public static boolean earlyDisplayResizable = loadParam("early-display-resizable", false); // LWJGLX_EARLY_DISPLAY_RESIZEABLE
+    public static boolean translateKeyNames = loadParam("translate-key-names", true); // LWJGLX_TRANSLATE_KEY_NAMES
     // TODO This is broken for now.
     public static boolean disableWindowIcon = loadParam("disable-window-icon", true); // LWJGLX_DISABLE_WINDOW_ICON
 
