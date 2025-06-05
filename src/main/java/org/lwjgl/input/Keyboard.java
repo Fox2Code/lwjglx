@@ -3,6 +3,7 @@ package org.lwjgl.input;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
@@ -307,6 +308,7 @@ public class Keyboard {
 				if (name == null || name.isEmpty()) {
 					continue;
 				}
+				name = name.toUpperCase(Locale.ROOT);
 				if (keyName[key] == null && !keyMap.containsKey(name)) {
 					keyName[key] = name;
 					keyMap.put(name, key);
