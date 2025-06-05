@@ -31,6 +31,8 @@
  */
 package org.lwjgl;
 
+import org.lwjgl.system.MemoryUtil;
+
 /**
  * Base PointerWrapper implementation.
  *
@@ -40,7 +42,10 @@ public abstract class PointerWrapperAbstract implements PointerWrapper {
 
 	protected final long pointer;
 
-	protected PointerWrapperAbstract(final long pointer) {
+	protected PointerWrapperAbstract(long pointer) {
+		if (pointer == MemoryUtil.NULL) {
+			pointer = this.lwjglxGetPointer();
+		}
 		this.pointer = pointer;
 	}
 
@@ -88,5 +93,9 @@ public abstract class PointerWrapperAbstract implements PointerWrapper {
 
 	public String toString() {
 		return getClass().getSimpleName() + " pointer (0x" + Long.toHexString(pointer).toUpperCase() + ")";
+	}
+
+	protected long lwjglxGetPointer() {
+		return MemoryUtil.NULL;
 	}
 }

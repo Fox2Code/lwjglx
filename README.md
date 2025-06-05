@@ -10,6 +10,7 @@ List of overrides:
 - `org.lwjgl.openal.AL`
 - `org.lwjgl.openal.AL10`
 - `org.lwjgl.openal.ALC10`
+- `org.lwjgl.opengl.ARBDebugOutput`
 - `org.lwjgl.opengl.ARBShaderObjects`
 - `org.lwjgl.opengl.GL11`
 - `org.lwjgl.opengl.GL15`
