@@ -10,11 +10,13 @@ List of overrides:
 - `org.lwjgl.openal.AL`
 - `org.lwjgl.openal.AL10`
 - `org.lwjgl.openal.ALC10`
+- `org.lwjgl.opengl.AMDDebugOutput`
 - `org.lwjgl.opengl.ARBDebugOutput`
 - `org.lwjgl.opengl.ARBShaderObjects`
 - `org.lwjgl.opengl.GL11`
 - `org.lwjgl.opengl.GL15`
 - `org.lwjgl.opengl.GL20`
+- `org.lwjgl.opengl.KHRDebug`
 
 If one of these classes appear in your stack-trace, please make sure you made LWJGLX load before LWJGL.
 
