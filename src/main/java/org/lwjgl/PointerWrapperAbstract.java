@@ -83,7 +83,7 @@ public abstract class PointerWrapperAbstract implements PointerWrapper {
 	}
 
 	public int hashCode() {
-		return (int)(pointer ^ (pointer >>> 32));
+		return Long.hashCode(pointer);
 	}
 
 	public String toString() {

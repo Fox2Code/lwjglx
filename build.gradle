@@ -22,7 +22,7 @@ switch (OperatingSystem.current()) {
 }
 
 group = 'org.lwjgl'
-version = '0.22'
+version = '0.23'
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_1_8
@@ -55,6 +55,7 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	implementation  'com.google.code.findbugs:jsr305:3.0.2'
+	compileOnly 'net.java.jinput:jinput:2.0.10'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

@@ -9,6 +9,7 @@ class EventQueue {
 	private int maxEvents = 32;
 	private int currentEventPos = -1;
 	private int nextEventPos = 0;
+	private int queuedEventCount = 0;
 
 	EventQueue(int maxEvents) {
 		this.maxEvents = maxEvents;
@@ -19,6 +20,7 @@ class EventQueue {
 	 */
 	void add() {
 		nextEventPos++; // increment next event position
+		queuedEventCount++;
 		if (nextEventPos == maxEvents)
 			nextEventPos = 0; // wrap next event position
 
@@ -40,6 +42,7 @@ class EventQueue {
 		if (nextEventPos == 0 && currentEventPos == maxEvents - 1)
 			return false;
 
+		queuedEventCount--;
 		currentEventPos++; // increment current event position
 		if (currentEventPos == maxEvents)
 			currentEventPos = 0; // wrap current event position
@@ -57,5 +60,9 @@ class EventQueue {
 
 	int getNextPos() {
 		return nextEventPos;
+	}
+
+	int getQueuedEventCount() {
+		return queuedEventCount;
 	}
 }

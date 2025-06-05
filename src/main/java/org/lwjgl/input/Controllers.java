@@ -49,13 +49,27 @@ public class Controllers {
     /** Whether controllers were created */
     private static boolean created;
 
+    private static boolean lwjglxHasJInput;
+
     /**
      * Initialise the controllers collection
      *
      * @throws LWJGLException Indicates a failure to initialise the controller library.
      */
     public static void create() throws LWJGLException {
+        if (created && !lwjglxHasJInput) {
+            return;
+        }
         created = true;
+        try {
+            ControllersJInput.create();
+            lwjglxHasJInput = true;
+        } catch (LWJGLException e) {
+            lwjglxHasJInput = true;
+            throw e;
+        } catch (Throwable ignored) {
+            lwjglxHasJInput = false;
+        }
     }
 
     /**
@@ -65,6 +79,9 @@ public class Controllers {
      * @return The controller requested
      */
     public static Controller getController(int index) {
+        if (lwjglxHasJInput) {
+            return ControllersJInput.getController(index);
+        }
         throw new IndexOutOfBoundsException("Index: " + index + ", Size: 0");
     }
 
@@ -74,6 +91,9 @@ public class Controllers {
      * @return The number of controllers available
      */
     public static int getControllerCount() {
+        if (lwjglxHasJInput) {
+            return ControllersJInput.getControllerCount();
+        }
         return 0;
     }
 
@@ -82,6 +102,9 @@ public class Controllers {
      * and generate events that must be cleared.
      */
     public static void poll() {
+        if (lwjglxHasJInput) {
+            ControllersJInput.poll();
+        }
     }
 
     /**
@@ -97,7 +120,7 @@ public class Controllers {
      * @return True if there is still an event to process
      */
     public static boolean next() {
-        if (events.size() == 0) {
+        if (events.isEmpty()) {
             event = null;
             return false;
         }
@@ -111,29 +134,16 @@ public class Controllers {
      * @return True if Controllers has been created
      */
     public static boolean isCreated() {
-        return created;
+        return lwjglxHasJInput ? ControllersJInput.isCreated() : created;
     }
 
     /**
      * Destroys any resources used by the controllers
      */
     public static void destroy() {
-// 		FIXME! not currently possible to destroy a controller
-
-//		if (!created)
-//			return;
-//		created = false;
-//
-//		// nuke each controller
-//		for (int i=0;i<controllers.size();i++) {
-//			//
-//		}
-//
-//		// cleanup
-//		event = null;
-//		events.clear();
-//		controllers.clear();
-//		controllerCount = 0;
+        if (lwjglxHasJInput) {
+            ControllersJInput.destroy();
+        }
     }
 
     /**
