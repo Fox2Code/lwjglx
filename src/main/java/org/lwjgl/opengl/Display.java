@@ -6,10 +6,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.awt.Canvas;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
+import java.nio.*;
 import java.util.Objects;
 
 import org.lwjgl.*;
@@ -1144,8 +1141,17 @@ public class Display {
         IntBuffer intBuffer = byteBuffer.asIntBuffer();
         LongBuffer longBuffer = byteBuffer.asLongBuffer();
         for (int i = 0; i < icons.length; i++) {
-            long pixelData = MemoryUtil.memAddress0(icons[i]);
-            int pixelCount = (icons[i].capacity() / 4);
+            long pixelData;
+            ByteBuffer icon = icons[i];
+            try {
+                pixelData = MemoryUtil.memAddress0((Buffer) icon);
+            } catch (NoSuchMethodError error) {
+                if (icon.position() != 0) {
+                    ((Buffer) icon).position(0);
+                }
+                pixelData = MemoryUtil.memAddress((Buffer) icon);
+            }
+            int pixelCount = (icon.capacity() / 4);
             if (pixelData == MemoryUtil.NULL) {
                 throw new RuntimeException("Invalid or null pixel data!");
             }
@@ -1166,7 +1172,7 @@ public class Display {
             intBuffer.put(off, sideLen);
             intBuffer.put(off + 1, sideLen);
         }
-        byteBuffer.position(0);
+        ((Buffer) byteBuffer).position(0);
         return new GLFWIcons(byteBuffer);
     }
 
