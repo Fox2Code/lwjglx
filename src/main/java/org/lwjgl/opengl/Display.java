@@ -9,25 +9,23 @@ import java.awt.Canvas;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.util.Objects;
 
-import org.lwjgl.BufferUtils;
+import org.lwjgl.*;
 import org.lwjgl.glfw.*;
-import org.lwjgl.LWJGLUtil;
 import org.lwjgl.system.LWJGLXHelper;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.Sys;
 import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.system.Pointer;
 
 import javax.annotation.Nullable;
 
 public class Display {
 
     private static String windowTitle = "Game";
-
-    private static org.lwjgl.opengl.GLContext context;
 
     private static DisplayImplementation display_impl;
 
@@ -68,7 +66,10 @@ public class Display {
     private static Canvas parent;
 
     @Nullable
-    private static GLFWImage.Buffer icons;
+    private static GLFWIcons icons;
+
+    @Nullable
+    private static GLFWIcons activeIcons;
 
     private static int swap_interval;
 
@@ -217,8 +218,6 @@ public class Display {
             
         }
         */
-        
-        setIcon(new ByteBuffer[] { LWJGLUtil.LWJGLIcon32x32, LWJGLUtil.LWJGLIcon16x16 });
 	}
 
     public static void create(PixelFormat pixel_format, Drawable shared_drawable) throws LWJGLException {
@@ -449,7 +448,7 @@ public class Display {
         }
 
         glfwMakeContextCurrent(Window.handle);
-        context = org.lwjgl.opengl.GLContext.createFromCurrent();
+        Objects.requireNonNull(org.lwjgl.opengl.GLContext.getCapabilities());
 
         glfwShowWindow(Window.handle);
         if(parent != null) parent.setSize(displayWidth, displayHeight);
@@ -457,8 +456,15 @@ public class Display {
         Mouse.create();
         Keyboard.create();
 
-        if (icons != null && parent == null) {
-            lwjglxSetWindowIcon(Display.icons);
+        if (parent == null) {
+            if (Display.icons != null) {
+                lwjglxSetWindowIcons(Display.icons);
+                Display.icons = null;
+            } else if (Display.activeIcons != null) {
+                lwjglxSetWindowIcons(Display.activeIcons);
+            } else {
+                lwjglxSetDefaultIcons();
+            }
         }
 
         Keyboard.lwjglxInitializeKeyboardTranslate();
@@ -777,10 +783,6 @@ public class Display {
         return displayVisible;
     }
 
-    public static org.lwjgl.opengl.GLContext getContext() {
-        return context;
-    }
-
     public static void setLocation(int new_x, int new_y) {
         if (Window.handle == NULL) {
             Display.displayX = new_x;
@@ -982,12 +984,11 @@ public class Display {
 
     public static int setIcon(java.nio.ByteBuffer[] icons) {
         if (LWJGLXHelper.disableWindowIcon) return 0;
-        // TODO
         try {
             if (Window.handle == MemoryUtil.NULL) {
-                Display.icons = new GLFWImage.Buffer(icons[0]);
+                Display.icons = lwjglxToGLFWIcons(icons);
             } else {
-                lwjglxSetWindowIcon(new GLFWImage.Buffer(icons[0]));
+                lwjglxSetWindowIcons(lwjglxToGLFWIcons(icons));
             }
         } catch (NullPointerException e) {
             LWJGLUtil.log("Couldn't set icon");
@@ -1084,18 +1085,18 @@ public class Display {
 
     public static void makeCurrent() throws LWJGLException {
         if (!isCurrent()) {
-            // -glfwMakeContextCurrent(Window.handle);
+            Display.drawable.makeCurrent();
         }
     }
 
-    public static java.lang.String getAdapter() {
-        // TODO
-        return "GeNotSupportedAdapter";
+    public static @Nullable java.lang.String getAdapter() {
+        // Only returned non-null on Windows
+        return null;
     }
 
-    public static java.lang.String getVersion() {
-        // TODO
-        return "1.0 NOT SUPPORTED";
+    public static @Nullable java.lang.String getVersion() {
+        // Only returned non-null on Windows
+        return null;
     }
 
     /**
@@ -1132,17 +1133,79 @@ public class Display {
         Window.setCallbacks();
 
         // glfwMakeContextCurrent(Window.handle);
-        context = org.lwjgl.opengl.GLContext.createFromCurrent();
+        Objects.requireNonNull(org.lwjgl.opengl.GLContext.getCapabilities());
 
         glfwSwapInterval(0);
         glfwShowWindow(Window.handle);
     }
 
-    private static void lwjglxSetWindowIcon(GLFWImage.Buffer icons) {
+    private static GLFWIcons lwjglxToGLFWIcons(java.nio.ByteBuffer[] icons) {
+        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(GLFWImage.SIZEOF * icons.length);
+        IntBuffer intBuffer = byteBuffer.asIntBuffer();
+        LongBuffer longBuffer = byteBuffer.asLongBuffer();
+        for (int i = 0; i < icons.length; i++) {
+            long pixelData = MemoryUtil.memAddress0(icons[i]);
+            int pixelCount = (icons[i].capacity() / 4);
+            if (pixelData == MemoryUtil.NULL) {
+                throw new RuntimeException("Invalid or null pixel data!");
+            }
+            int sideLen = (int) Math.floor(Math.sqrt(pixelCount));
+            if (sideLen * sideLen != pixelCount) {
+                throw new RuntimeException("Only supports square icons!");
+            }
+            int off;
+            if (Pointer.POINTER_SIZE == 8) {
+                off = (i * 4);
+                longBuffer.put(1 + (i * 2), pixelData);
+            } else if (Pointer.POINTER_SIZE == 4) {
+                off = (i * 3);
+                intBuffer.put(2 + off, (int) (pixelData & 0xFFFFFFFFL));
+            } else {
+                throw new RuntimeException("Unsupported pointer size: " + Pointer.POINTER_SIZE);
+            }
+            intBuffer.put(off, sideLen);
+            intBuffer.put(off + 1, sideLen);
+        }
+        byteBuffer.position(0);
+        return new GLFWIcons(byteBuffer);
+    }
+
+    private static void lwjglxSetWindowIcons(GLFWIcons icons) {
         if (LWJGLXHelper.disableWindowIcon) return;
-        if (icons.address() != MemoryUtil.NULL && Window.handle != NULL &&
-                icons.width() != 0 && icons.height() != 0) {
+        if (icons.address() != MemoryUtil.NULL && Window.handle != MemoryUtil.NULL) {
+            GLFWImage.Buffer oldBuffer = Display.activeIcons;
             glfwSetWindowIcon(Window.handle, icons);
+            Display.activeIcons = icons;
+            if (oldBuffer != icons &&
+                    oldBuffer != null) {
+                oldBuffer.free();
+            }
+        }
+    }
+
+    private static void lwjglxSetDefaultIcons() {
+        setIcon(new ByteBuffer[] { LWJGLUtil.LWJGLIcon32x32, LWJGLUtil.LWJGLIcon16x16 });
+    }
+
+    // Keep track if the icons have been freed
+    static class GLFWIcons extends GLFWImage.Buffer {
+        private boolean freed;
+
+        public GLFWIcons(ByteBuffer container) {
+            super(container);
+        }
+
+        @Override
+        public long address() {
+            return this.freed ? MemoryUtil.NULL : super.address();
+        }
+
+        @Override
+        public void free() {
+            if (!this.freed) {
+                this.freed = true;
+                super.free();
+            }
         }
     }
 

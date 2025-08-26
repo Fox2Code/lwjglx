@@ -61,7 +61,7 @@ final class ContextGL implements Context {
     // private static final ContextImplementation implementation;
 
     /** The current Context */
-    private static final ThreadLocal<ContextGL> current_context_local = new ThreadLocal<ContextGL>();
+    private static final ThreadLocal<ContextGL> current_context_local = new ThreadLocal<>();
 
     /** Handle to the native GL rendering context */
     private final ByteBuffer handle;
@@ -123,9 +123,10 @@ final class ContextGL implements Context {
     /** Release the current context (if any). After this call, no context is current. */
     public void releaseCurrent() throws LWJGLException {
         ContextGL current_context = getCurrentContext();
-        if ( current_context != null ) {
-            GLFW.glfwMakeContextCurrent(0l);
+        if (current_context != null) {
+            GLFW.glfwMakeContextCurrent(0L);
             isCurrent = false;
+            GLContext.useContext(null);
             current_context_local.set(null);
             synchronized ( current_context ) {
                 current_context.thread = null;
@@ -176,6 +177,7 @@ final class ContextGL implements Context {
         current_context_local.set(this);
         GLFW.glfwMakeContextCurrent(Display.Window.handle);
         isCurrent = true;
+        GLContext.useContext(this, this.forwardCompatible);
     }
 
     ByteBuffer getHandle() {
@@ -250,5 +252,4 @@ final class ContextGL implements Context {
     public synchronized void setCLSharingProperties(final PointerBuffer properties) throws LWJGLException {
         throw new UnsupportedOperationException("CL/GL context sharing is not supported on this platform.");
     }
-
 }

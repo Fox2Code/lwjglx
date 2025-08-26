@@ -30,6 +30,12 @@ public class ContextCapabilities {
 		if (LWJGLXHelper.assumeGlExtensions) {
 			this.GL_EXT_texture_rectangle |= this.GL_ARB_texture_rectangle;
 		}
+        // don't expose extensions we know we don't support well
+        if (LWJGLXHelper.excludeGlExtensions) {
+            this.GL_APPLE_fence = false;
+            this.GL_ARB_sync = false;
+            this.GL_NV_fence = false;
+        }
 	}
 
 	public boolean GL_AMD_blend_minmax_factor;

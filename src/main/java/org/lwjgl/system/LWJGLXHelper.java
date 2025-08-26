@@ -8,14 +8,14 @@ import java.util.Objects;
 
 public class LWJGLXHelper {
     public static boolean assumeGlExtensions = loadParam("assume-gl-extensions", true); // LWJGLX_ASSUME_GL_EXTENSIONS
+    public static boolean excludeGlExtensions = loadParam("exclude-gl-extensions", true); // LWJGLX_EXCLUDE_GL_EXTENSIONS
     public static boolean attrRecreateDisplay = loadParam("attr-recreate-display", true); // LWJGLX_ATTR_RECREATE_DISPLAY
     public static boolean resizeRecreateDisplay = loadParam("resize-recreate-display", false); // LWJGLX_RESIZE_RECREATE_DISPLAY
     public static boolean awtCanvasNoCreate = loadParam("awt-canvas-no-create", false); // LWJGLX_AWT_CANVAS_NO_CREATE
     public static boolean earlyDisplayCreate = loadParam("early-display-create", false); // LWJGLX_EARLY_DISPLAY_CREATE
     public static boolean earlyDisplayResizable = loadParam("early-display-resizable", false); // LWJGLX_EARLY_DISPLAY_RESIZEABLE
     public static boolean translateKeyNames = loadParam("translate-key-names", true); // LWJGLX_TRANSLATE_KEY_NAMES
-    // TODO This is broken for now.
-    public static boolean disableWindowIcon = loadParam("disable-window-icon", true); // LWJGLX_DISABLE_WINDOW_ICON
+    public static boolean disableWindowIcon = loadParam("disable-window-icon", false); // LWJGLX_DISABLE_WINDOW_ICON
 
     static {
         try {
